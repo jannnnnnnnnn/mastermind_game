@@ -7,14 +7,20 @@ import stylez from "./GuessRow.module.css";
 function GuessRow(props) {
   return (
     <div className={stylez.GuessRow}>
-      <div className={stylez.textSize}>{props.rowIdx + 1}</div>
+      <div
+        className={stylez.textSize}
+        style={{ color: props.currentGuess ? "black" : "lightgrey" }}
+      >
+        {props.rowIdx + 1}
+      </div>
       <GuessPegs
         colors={props.colors}
         code={props.guess.code}
         currentGuess={props.currentGuess}
+        changeColor={props.changeColor}
       />
-      {props.currentGuess ? (
-        <ScoreButton />
+      {props.currentGuess && props.guess.score.perfect !== 4 ? (
+        <ScoreButton guess={props.guess.code} checkGuess={props.checkGuess} />
       ) : (
         <GuessScore score={props.guess.score} />
       )}

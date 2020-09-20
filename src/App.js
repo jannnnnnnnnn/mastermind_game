@@ -7,7 +7,7 @@ import NewGameButton from "./components/NewGameButton/NewGameButton";
 
 const colors = ["#7CCCE5", "#FDE47F", "#E04644", "#B576AD"];
 
-class App extends React.Component {
+class App extends Component {
   constructor(props) {
     // JS requires that super be called before accessing 'this'
     super(props);
@@ -26,15 +26,52 @@ class App extends React.Component {
     this.setState({
       selColorIdx: 0,
       guesses: [this.getNewGuess()],
-      code: thisgenCode(),
+      code: this.genCode(),
     });
   };
 
-  updateColor = () => {
-    this.setState({
-      selColorIdx: ++this.state.selColorIdx % 4,
-    });
+  checkGuess = () => {
+    // console.log("i am checking guesses");
+    let currentRow = { ...this.state.guesses[this.state.guesses.length - 1] };
+    let perfect = 0;
+    let almost = 0;
+    let leftoverGuesses = [];
+    let leftoverWinningCode = [];
+    for (let i = 0; i < currentRow.code.length; i++) {
+      if (currentRow.code[i] === this.state.code[i]) {
+        perfect++;
+      } else {
+        leftoverGuesses.push(currentRow.code[i]);
+        leftoverWinningCode.push(this.state.code[i]);
+      }
+    }
+
+    for (let i = 0; i < leftoverGuesses.length; i++) {
+      let idx = leftoverWinningCode.indexOf(leftoverGuesses[i]);
+      if (idx > -1) {
+        almost++;
+        leftoverWinningCode.splice(idx, 1);
+      }
+    }
+
+    currentRow.score.perfect = perfect;
+    currentRow.score.almost = almost;
+    let allGuesses = [...this.state.guesses];
+    allGuesses.pop();
+    if (perfect === 4) {
+      this.setState({ guesses: [...allGuesses, currentRow] });
+    } else {
+      this.setState({
+        guesses: [...allGuesses, currentRow, this.getNewGuess()],
+      });
+    }
   };
+
+  // updateColor = () => {
+  //   this.setState({
+  //     selColorIdx: ++this.state.selColorIdx % 4,
+  //   });
+  // };
 
   // updateColor = function yoyo() {
   //   this.setState({
@@ -79,6 +116,14 @@ class App extends React.Component {
     this.setState({ selColorIdx: colorIdx });
   };
 
+  changeColor = (idx) => {
+    // console.log("i am changing color");
+    let currentRow = { ...this.state.guesses[this.state.guesses.length - 1] };
+    currentRow.code[idx] = this.state.selColorIdx;
+    let allGuesses = [...this.state.guesses];
+    allGuesses.pop();
+    this.setState({ guesses: [...allGuesses, currentRow] });
+  };
   //old way needs binding in the constructor
   // handleColorSelection(colorIdx) {
   //   // alert("color selected" + colorIdx);
@@ -93,7 +138,12 @@ class App extends React.Component {
       <div className="App">
         <header className="App-header-footer">REACT MASTERMIND</header>
         <div className="flex-h">
-          <GameBoard colors={colors} guesses={this.state.guesses} />
+          <GameBoard
+            colors={colors}
+            guesses={this.state.guesses}
+            changeColor={this.changeColor}
+            checkGuess={this.checkGuess}
+          />
           <div className="App-controls">
             <ColorPicker
               colors={colors}
@@ -101,7 +151,7 @@ class App extends React.Component {
               selColorIdx={this.state.selColorIdx}
             />
             <GameTimer />
-            <NewGameButton />
+            <NewGameButton newGame={this.newGame} />
           </div>
         </div>
         <footer className="App-header-footer">

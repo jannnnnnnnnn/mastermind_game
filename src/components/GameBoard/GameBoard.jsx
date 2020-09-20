@@ -18,6 +18,8 @@ function GameBoard(props) {
           rowIdx={idx}
           currentGuess={idx === props.guesses.length - 1}
           key={idx}
+          changeColor={props.changeColor}
+          checkGuess={props.checkGuess}
         />
       ))}
       {/* {newColor} */}
