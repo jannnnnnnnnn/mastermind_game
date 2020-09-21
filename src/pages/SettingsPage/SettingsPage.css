@@ -1,0 +1,19 @@
+.colorDisplay {
+  width: 40px;
+  height: 40px;
+  margin: 5px;
+  border-width: 0px;
+  border-radius: 50%;
+  opacity: 0.85;
+  cursor: pointer;
+  border-style: solid;
+}
+
+.SettingsPage-levels {
+  display: flex;
+}
+
+.SettingsPage {
+  display: flex;
+  flex-direction: column;
+}

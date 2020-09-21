@@ -11,15 +11,3 @@
   font-size: 18px;
   text-align: center;
 }
-
-button:focus,
-.btn:focus {
-  outline: none;
-}
-
-.App-controls {
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: space-between;
-  margin-left: 20px;
-}

@@ -1,37 +1,47 @@
 import React, { Component } from "react";
 import "./App.css";
-import GameBoard from "./components/GameBoard/GameBoard";
-import ColorPicker from "./components/ColorPicker/ColorPicker";
-import GameTimer from "./components/GameTimer/GameTimer";
-import NewGameButton from "./components/NewGameButton/NewGameButton";
+import { Route, Switch } from "react-router-dom";
+import GamePage from "../../pages/GamePage/GamePage";
+import SettingsPage from "../../pages/SettingsPage/SettingsPage";
 
-const colors = ["#7CCCE5", "#FDE47F", "#E04644", "#B576AD"];
-
+const colors = {
+  Easy: ["#7CCCE5", "#FDE47F", "#E04644", "#B576AD"],
+  Moderate: ["#7CCCE5", "#FDE47F", "#E04644", "#B576AD", "#28df99"],
+  Difficult: ["#7CCCE5", "#FDE47F", "#E04644", "#B576AD", "#28df99", "#2d4059"],
+};
 class App extends Component {
   constructor(props) {
     // JS requires that super be called before accessing 'this'
     super(props);
     // this.state is an object that holds "state" in its properties
-    this.state = {
-      selColorIdx: 0,
-      guesses: [this.getNewGuess()],
-      code: this.genCode(),
-    };
+    this.state = { ...this.getInitialState(), difficulty: "Easy" };
     //do not need to use binding if converted to call back function
     // this.updateColor = this.updateColor.bind(this);
     // this.handleColorSelection = this.handleColorSelection.bind(this);
   }
-
-  newGame = () => {
-    this.setState({
+  componentDidMount() {
+    console.log("App: componentDidMount");
+  }
+  handleTimerUpdate = () => {
+    this.setState((state) => ({ elapsedTime: ++state.elapsedTime }));
+  };
+  getInitialState() {
+    return {
       selColorIdx: 0,
       guesses: [this.getNewGuess()],
       code: this.genCode(),
-    });
+      elapsedTime: 0,
+    };
+  }
+
+  newGame = () => {
+    console.log("i am in new Game");
+    this.setState(this.getInitialState());
   };
 
   checkGuess = () => {
-    // console.log("i am checking guesses");
+    console.log("i am checking guesses");
+    console.log(this.state.code);
     let currentRow = { ...this.state.guesses[this.state.guesses.length - 1] };
     let perfect = 0;
     let almost = 0;
@@ -91,9 +101,11 @@ class App extends Component {
   }
 
   genCode() {
+    let numColors = this.state && colors[this.state.difficulty].length;
+    numColors = numColors || 4;
     return new Array(4)
       .fill()
-      .map(() => Math.floor(Math.random() * colors.length));
+      .map((dummy) => Math.floor(Math.random() * numColors));
   }
 
   // updateColor() {
@@ -131,32 +143,50 @@ class App extends Component {
   //     selColorIdx: colorIdx,
   //   });
   // }
-
+  changeDifficulty = (level) => {
+    console.log("i am in changing difficulty");
+    console.log(level);
+    this.setState({ difficulty: level, ...this.getInitialState() });
+  };
   render() {
     let winTries = this.getWinTries();
     return (
       <div className="App">
-        <header className="App-header-footer">REACT MASTERMIND</header>
-        <div className="flex-h">
-          <GameBoard
-            colors={colors}
-            guesses={this.state.guesses}
-            changeColor={this.changeColor}
-            checkGuess={this.checkGuess}
+        <header className="App-header-footer">
+          R E A C T &nbsp;&nbsp;&nbsp; M A S T E R M I N D
+        </header>
+        <Switch>
+          <Route
+            exact
+            path="/"
+            render={() => (
+              <GamePage
+                winTries={winTries}
+                colors={colors[this.state.difficulty]}
+                selColorIdx={this.state.selColorIdx}
+                guesses={this.state.guesses}
+                handleColorSelection={this.handleColorSelection}
+                newGame={this.newGame}
+                changeColor={this.changeColor}
+                checkGuess={this.checkGuess}
+                handleTimerUpdate={this.handleTimerUpdate}
+                elapsedTime={this.state.elapsedTime}
+              />
+            )}
           />
-          <div className="App-controls">
-            <ColorPicker
-              colors={colors}
-              handleColorSelection={this.handleColorSelection}
-              selColorIdx={this.state.selColorIdx}
-            />
-            <GameTimer />
-            <NewGameButton newGame={this.newGame} />
-          </div>
-        </div>
-        <footer className="App-header-footer">
-          {winTries ? `You Won in ${winTries} Guesses!` : "Good Luck!"}
-        </footer>
+          <Route
+            exact
+            path="/settings"
+            render={(props) => (
+              <SettingsPage
+                {...props}
+                colors={colors}
+                difficulty={this.state.difficulty}
+                changeDifficulty={this.changeDifficulty}
+              />
+            )}
+          />
+        </Switch>
       </div>
     );
   }
